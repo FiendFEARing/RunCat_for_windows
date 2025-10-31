@@ -69,9 +69,19 @@ namespace RunCat
 
         public RunCatApplicationContext()
         {
-            UserSettings.Default.Reload();
-            runner = UserSettings.Default.Runner;
-            manualTheme = UserSettings.Default.Theme;
+            // Load settings with error handling
+            try
+            {
+                UserSettings.Default.Reload();
+                runner = UserSettings.Default.Runner ?? "cat"; // Fallback to default if null
+                manualTheme = UserSettings.Default.Theme ?? ""; // Fallback to default if null
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to load user settings: {ex.Message}");
+                runner = "cat"; // Default fallback
+                manualTheme = ""; // Default fallback
+            }
 
             Application.ApplicationExit += new EventHandler(OnApplicationExit);
 
@@ -180,10 +190,17 @@ namespace RunCat
         }
         private void OnApplicationExit(object sender, EventArgs e)
         {
-            UserSettings.Default.Runner = runner;
-            UserSettings.Default.Theme = manualTheme;
-            UserSettings.Default.Speed = speed;
-            UserSettings.Default.Save();
+            try
+            {
+                UserSettings.Default.Runner = runner;
+                UserSettings.Default.Theme = manualTheme;
+                UserSettings.Default.Speed = speed;
+                UserSettings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to save settings on exit: {ex.Message}");
+            }
         }
 
         private bool IsStartupEnabled()
@@ -250,8 +267,21 @@ namespace RunCat
         {
             ToolStripMenuItem item = (ToolStripMenuItem)sender;
             UpdateCheckedState(item, runnerMenu);
-            runner = item.Text.ToLower();
+            
+            // Handle special case for JapaneseApology to maintain consistency
+            runner = item.Text.Equals("JapaneseApology") ? "japaneseapology" : item.Text.ToLower();
             SetIcons();
+            
+            // Save the runner setting immediately
+            try
+            {
+                UserSettings.Default.Runner = runner;
+                UserSettings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to save runner setting: {ex.Message}");
+            }
         }
 
         private void SetThemeIcons(object sender, EventArgs e)
@@ -260,6 +290,17 @@ namespace RunCat
             manualTheme = "";
             systemTheme = GetAppsUseTheme();
             SetIcons();
+            
+            // Save the theme setting immediately
+            try
+            {
+                UserSettings.Default.Theme = manualTheme;
+                UserSettings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to save theme setting: {ex.Message}");
+            }
         }
 
         private void SetSpeed()
@@ -282,6 +323,17 @@ namespace RunCat
             UpdateCheckedState(item, runnerSpeedLimit);
             speed = item.Text.ToLower();
             SetSpeed();
+            
+            // Save the speed setting immediately
+            try
+            {
+                UserSettings.Default.Speed = speed;
+                UserSettings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to save speed setting: {ex.Message}");
+            }
         }
 
         private void UpdateThemeIcons()
@@ -302,6 +354,17 @@ namespace RunCat
             UpdateCheckedState((ToolStripMenuItem)sender, themeMenu);
             manualTheme = "light";
             SetIcons();
+            
+            // Save the theme setting immediately
+            try
+            {
+                UserSettings.Default.Theme = manualTheme;
+                UserSettings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to save theme setting: {ex.Message}");
+            }
         }
 
         private void SetDarkIcons(object sender, EventArgs e)
@@ -309,6 +372,17 @@ namespace RunCat
             UpdateCheckedState((ToolStripMenuItem)sender, themeMenu);
             manualTheme = "dark";
             SetIcons();
+            
+            // Save the theme setting immediately
+            try
+            {
+                UserSettings.Default.Theme = manualTheme;
+                UserSettings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to save theme setting: {ex.Message}");
+            }
         }
         private void UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
