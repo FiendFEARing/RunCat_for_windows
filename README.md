@@ -11,7 +11,7 @@
 
 # Tags
 
-`C#` `.NET 6.0` `Visual Studio` `RunCat`
+`C#` `.NET 8.0` `Visual Studio` `RunCat`
 
 # Demo
 
